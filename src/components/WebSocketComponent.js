@@ -1,11 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Terminal } from "xterm"
+import { FitAddon } from "xterm-addon-fit"
 import "./WebSocketComponent.css"
+require("xterm/css/xterm.css")
 
 function WebSocketComponent() {
   const [serverAddress, setServerAddress] = useState('');
   const [messages, setMessages] = useState([]);
   const [connected, setConnected] = useState(false);
   const [websocket, setWebSocket] = useState(null);
+  const [terminal, setTerminal] = useState(null);
+  const [configured, setConfigured] = useState(false)
+
+
+  useEffect(() => {
+    if(!terminal){
+      const term = new Terminal();
+      const fitAddon = new FitAddon();
+      term.loadAddon(fitAddon);
+
+      term.open(document.getElementById("xterm-container"));
+      
+      
+      term.writeln("Hello web terminal");
+
+      setTerminal(term);
+    }
+
+    if(websocket && !configured){
+      terminal.onData((e)=>{
+        terminal.write(e);
+      });
+
+      setConfigured(true)
+    }    
+  })
 
 
 
@@ -19,6 +48,7 @@ function WebSocketComponent() {
       const ws = new WebSocket(serverAddress);
 
       ws.onopen = () => {
+        terminal.writeln("Connected to " + serverAddress)
         setConnected(true);
         setWebSocket(ws);
       };
@@ -37,7 +67,6 @@ function WebSocketComponent() {
   const sendMessage = (message) => {
     if (websocket && connected) {
       let data = message.key.charCodeAt(0)
-      console.log(">> ", data)
       websocket.send(data);
     }
   };
@@ -52,16 +81,10 @@ function WebSocketComponent() {
         </label>
         <button onClick={connectWebSocket}>연결</button>
       </div>
-      <div>
-        {connected ? (
-          <div>
-            <input readOnly={true} className="terminal" onKeyDown={sendMessage} value={messages}/>
-          </div>
-        ) : (
-          <div>WebSocket에 연결되지 않았습니다.</div>
-        )}
-      </div>
+
+      <div id="xterm-container"></div>
     </div>
+    
   );
 }
 
