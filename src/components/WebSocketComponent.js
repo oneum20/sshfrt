@@ -1,39 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Terminal } from "xterm"
 import { FitAddon } from "xterm-addon-fit"
+import { AttachAddon } from "xterm-addon-attach"
 import "./WebSocketComponent.css"
-require("xterm/css/xterm.css")
+import "xterm/css/xterm.css"
 
 function WebSocketComponent() {
   const [serverAddress, setServerAddress] = useState('');
-  const [messages, setMessages] = useState([]);
   const [connected, setConnected] = useState(false);
   const [websocket, setWebSocket] = useState(null);
   const [terminal, setTerminal] = useState(null);
-  const [configured, setConfigured] = useState(false)
-
+  const fitAddon = new FitAddon();
 
   useEffect(() => {
     if(!terminal){
-      const term = new Terminal();
-      const fitAddon = new FitAddon();
+      const term = new Terminal({});
+      
       term.loadAddon(fitAddon);
-
       term.open(document.getElementById("xterm-container"));
-      
-      
+      fitAddon.fit()
       term.writeln("Hello web terminal");
 
       setTerminal(term);
     }
-
-    if(websocket && !configured){
-      terminal.onData((e)=>{
-        terminal.write(e);
-      });
-
-      setConfigured(true)
-    }    
   })
 
 
@@ -44,30 +33,18 @@ function WebSocketComponent() {
 
   const connectWebSocket = () => {
     if (serverAddress) {
-      console.log(">> " + serverAddress)
       const ws = new WebSocket(serverAddress);
+      const attachAddon = new AttachAddon(ws)
+      terminal.loadAddon(attachAddon)
 
       ws.onopen = () => {
         terminal.writeln("Connected to " + serverAddress)
-        setConnected(true);
         setWebSocket(ws);
-      };
-
-      ws.onmessage = (event) => {
-        const message = event.data;
-        setMessages(message);
       };
 
       ws.onclose = () => {
         setConnected(false);
       };
-    }
-  };
-
-  const sendMessage = (message) => {
-    if (websocket && connected) {
-      let data = message.key.charCodeAt(0)
-      websocket.send(data);
     }
   };
 
