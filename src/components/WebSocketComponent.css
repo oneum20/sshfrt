@@ -22,3 +22,14 @@ width: 5px;
 .xterm-viewport::-webkit-scrollbar-thumb {
 background: var(--highlight);
 }
+
+.container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.col {
+    padding: 10px;
+    border: 1px solid #ccc;
+}

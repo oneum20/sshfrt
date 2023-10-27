@@ -6,59 +6,121 @@ import "./WebSocketComponent.css"
 import "xterm/css/xterm.css"
 
 function WebSocketComponent() {
-  const [serverAddress, setServerAddress] = useState('');
-  const [connected, setConnected] = useState(false);
-  const [websocket, setWebSocket] = useState(null);
+  const [wsServerAddress, setWsServerAddress] = useState('');
+  const [sshServer, setSshServer] = useState({});
   const [terminal, setTerminal] = useState(null);
   const fitAddon = new FitAddon();
+  
 
   useEffect(() => {
     if(!terminal){
-      const term = new Terminal({});
+      const terminal = new Terminal()
+      terminal.loadAddon(fitAddon);
       
-      term.loadAddon(fitAddon);
-      term.open(document.getElementById("xterm-container"));
-      fitAddon.fit()
-      term.writeln("Hello web terminal");
+      terminal.open(document.getElementById("xterm-container"));
+      terminal.writeln("Hello web terminal");
 
-      setTerminal(term);
+      fitAddon.fit();
+      setTerminal(terminal)
     }
+    
   })
 
+  const handleSshConfigChange = (event) => {
+    const key = event.target.id;
+    let data = {};
+
+    switch(key){
+      case "ssh-host":
+        data = {host: event.target.value}
+        break;
+      case "ssh-port":
+        data = {port: event.target.value}
+        break;
+      case "ssh-user":
+        data = {username: event.target.value}
+        break;
+      case "ssh-pass":
+        data = {password: event.target.value}
+        break;
+      default:
+        break;
+    }
+    setSshServer(Object.assign({}, sshServer, data));
+  }
 
 
-  const handleServerAddressChange = (event) => {
-    setServerAddress(event.target.value);
+  const handleWsServerAddressChange = (event) => {
+    setWsServerAddress(event.target.value);
   };
 
   const connectWebSocket = () => {
-    if (serverAddress) {
-      const ws = new WebSocket(serverAddress);
+    if (wsServerAddress) {
+      const ws = new WebSocket(wsServerAddress);
       const attachAddon = new AttachAddon(ws)
       terminal.loadAddon(attachAddon)
 
+
+
       ws.onopen = () => {
-        terminal.writeln("Connected to " + serverAddress)
-        setWebSocket(ws);
+        terminal.writeln("Connecting to " + wsServerAddress)
+        ws.send(JSON.stringify(sshServer))
       };
 
       ws.onclose = () => {
-        setConnected(false);
+        terminal.writeln("\n\rwebsocket connection closed")
       };
+
+      ws.onerror = (event) => {
+        terminal.writeln(event)
+      }
     }
   };
 
   return (
     <div>
       <h1>SSH Bridge</h1>
-      <div>
-        <label>
-          WebSocket 서버 주소:
-          <input type="text" value={serverAddress} onChange={handleServerAddressChange} />
-        </label>
-        <button onClick={connectWebSocket}>연결</button>
-      </div>
+      <div className='container'>
+        <div className='row'>
+          <div className='col'>
+            <label>
+              SSH Server Host: 
+              <input id="ssh-host" type="text" value={sshServer.host || ""} onChange={handleSshConfigChange} />
+            </label>      
+          </div>
+          <div className='col'>
+            <label>
+              SSH Server Port: 
+              <input id="ssh-port" type="text" value={sshServer.port || ""} onChange={handleSshConfigChange} />
+            </label>
+          </div>
+        </div>
 
+        <div className='row'>
+          <div className='col'>
+            <label>
+              SSH Server Username: 
+              <input id="ssh-user" type="text" value={sshServer.username || ""} onChange={handleSshConfigChange} />
+            </label>
+          </div>
+          <div className='col'>
+            <label>
+              SSH Server User Password: 
+              <input id="ssh-pass" type="password" value={sshServer.password || ""} onChange={handleSshConfigChange} />
+          </label>
+          </div>
+        </div>
+        <div className='row'>
+          <div className='col'>
+            <label>
+              WebSocket Server Address:
+              <input type="text" value={wsServerAddress} onChange={handleWsServerAddressChange} />
+            </label>
+          </div>
+        </div>
+        <button onClick={connectWebSocket}>연결</button>
+
+      </div>
       <div id="xterm-container"></div>
     </div>
     
