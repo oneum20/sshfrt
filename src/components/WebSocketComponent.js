@@ -7,7 +7,7 @@ import "xterm/css/xterm.css"
 
 function WebSocketComponent() {
   const [wsServerAddress, setWsServerAddress] = useState('');
-  const [sshServer, setSshServer] = useState({});
+  const [sshServer, setSshServer] = useState({action: "connection"});
   const [terminal, setTerminal] = useState(null);
   const fitAddon = new FitAddon();
   
@@ -64,6 +64,8 @@ function WebSocketComponent() {
 
       ws.onopen = () => {
         terminal.writeln("Connecting to " + wsServerAddress)
+        
+        setSshServer(Object.assign({}, sshServer, {cols: terminal.cols, rows: terminal.rows}))
         ws.send(JSON.stringify(sshServer))
       };
 
