@@ -40,7 +40,7 @@ jobs:
 
             - 
               name: Install Dependencies
-              if: step.cache-primes.outputs.cache-hit != 'true'
+              if: steps.cache-primes.outputs.cache-hit != 'true'
               run: npm install
         
             - 
