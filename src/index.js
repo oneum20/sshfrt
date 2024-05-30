@@ -1,9 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import WebSocketComponent from './components/WebSocketComponent';
+import App from "./components/App";
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <WebSocketComponent/>
+  <App/>
 );
