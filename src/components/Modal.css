@@ -1,0 +1,70 @@
+.modal {
+    border: 2px solid black;
+    padding: 20px;
+    width: 300px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    font-family: Arial, sans-serif;
+
+    z-index: 1000;
+}
+
+.modal h1 {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.row label {
+    font-size: 0.9em;
+    margin-bottom: 5px;
+}
+
+.row input {
+    padding: 8px;
+    font-size: 0.9em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: calc(100% - 16px);
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.buttons button {
+    padding: 10px 20px;
+    font-size: 1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.buttons button:first-child {
+    background-color: #007BFF;
+    color: white;
+}
+
+.buttons button:last-child {
+    background-color: #6c757d;
+    color: white;
+}

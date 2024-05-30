@@ -1,0 +1,62 @@
+.app-container {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    width: 200px;
+    background-color: #f4f4f4;
+    padding: 10px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.editor {
+    padding: 20px;
+    background-color: #fff;
+    overflow: auto;
+}
+
+.terminal {
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    overflow: auto;
+}
+
+button {
+    display: block;
+    margin-bottom: 10px;
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.gutter {
+    background-color: #ddd;
+    background-repeat: no-repeat;
+    background-position: 50%;
+}
+
+.gutter-horizontal {
+    cursor: row-resize;
+    height: 10px;
+}
+
+.gutter-vertical {
+    cursor: col-resize;
+    width: 100%;
+}
