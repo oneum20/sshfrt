@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useRef } from 'react';
 import { Terminal } from "xterm"
 import { FitAddon } from "xterm-addon-fit"
 import { AttachAddon } from "xterm-addon-attach"
@@ -6,25 +6,26 @@ import "./Console.css"
 import "xterm/css/xterm.css"
 
 function Console(props) {
-  const [terminal, setTerminal] = useState(null);
-  const [websocket, setWebsocket] = useState(null);
+  const terminalRef = useRef(null);
+  const containerRef = useRef(null);
+  const websocketRef = useRef(null);
   const fitAddon = new FitAddon();
   
 
   useEffect(() => {
-
-    if(!terminal && !websocket){
+    if(terminalRef.current == null){
       const terminal = new Terminal();
       terminal.loadAddon(fitAddon);
 
       // 로그 레벨 설정
       // terminal.options.logLevel = "trace";
       
-      terminal.open(document.getElementById(props.id));
+      terminal.open(containerRef.current)
       terminal.writeln("Hello web terminal");
 
       fitAddon.fit();
-      setTerminal(terminal);
+      props.terminalsRef.current[props.uid] = terminal;
+      terminalRef.current = terminal;
 
 
 
@@ -49,8 +50,6 @@ function Console(props) {
 
       ws.onclose = () => {
         let curState = props.uid + "-close";
-        console.log("Connection Closed!!!");
-        terminal.writeln("\n\rwebsocket connection closed");
 
         props.onStateChange(curState);
       };
@@ -59,15 +58,16 @@ function Console(props) {
         terminal.writeln(event);
       };
 
-      setWebsocket(ws);
+      websocketRef.current = ws;
     }
-  });
+
+  }, [props.id, props.wsServerAddress, props.uid, props.sshServerConfig, props.onStateChange, props.terminalsRef]);
 
   
 
   return (
     <div>
-      <div id={props.id}></div>
+      <div id={props.id} ref={containerRef}></div>
     </div>
     
   );
