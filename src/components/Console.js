@@ -59,11 +59,34 @@ function Console(props) {
       };
 
       websocketRef.current = ws;
-    }
+
+    }    
+
+    // Cleanup function
+    return () => {
+      if (terminalRef.current) {
+        terminalRef.current.dispose();
+      }
+      if (websocketRef.current) {
+        websocketRef.current.close();
+      }
+    };
 
   }, [props.id, props.wsServerAddress, props.uid, props.sshServerConfig, props.onStateChange, props.terminalsRef]);
 
-  
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (websocketRef.current) {
+        websocketRef.current.close();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   return (
     <div>

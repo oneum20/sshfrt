@@ -3,7 +3,7 @@ import "./Modal.css"
 
 function Modal({ onClose, onSave }) {
     const [SshServerConfig, setSshServerConfig] = useState({action: "connection"});
-    const [wsServerAddress, setWsServerAddress] = useState('');
+    const [wsServerAddress, setWsServerAddress] = useState('ws://localhost:8080/ws');
 
 
   const handleWsServerAddressChange = (event) => {
@@ -34,7 +34,6 @@ function Modal({ onClose, onSave }) {
   };
 
   const handleSubmit = () => {
-    console.log(SshServerConfig);
     onSave([SshServerConfig, wsServerAddress]);
     onClose();
   };
