@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import "./Modal.css"
+import "./Modal.css";
 
 function Modal({ onClose, onSave }) {
     const [SshServerConfig, setSshServerConfig] = useState({action: "connection"});
@@ -39,45 +39,48 @@ function Modal({ onClose, onSave }) {
   };
 
   return (
-    <div className='modal'>
-      <h1>SSH Bridge</h1>
-      <div className='container'>
-          <div className='row'>
-              <label>
-                  SSH Server Host:
-                  <input id="ssh-host" type="text" value={SshServerConfig.host || ""} onChange={handleSshConfigChange} />
-              </label>
-          </div>
-          <div className='row'>
-              <label>
-                  SSH Server Port:
-                  <input id="ssh-port" type="text" value={SshServerConfig.port || ""} onChange={handleSshConfigChange} />
-              </label>
-          </div>
-          <div className='row'>
-              <label>
-                  SSH Server Username:
-                  <input id="ssh-user" type="text" value={SshServerConfig.username || ""} onChange={handleSshConfigChange} />
-              </label>
-          </div>
-          <div className='row'>
-              <label>
-                  SSH Server Password:
-                  <input id="ssh-pass" type="password" value={SshServerConfig.password || ""} onChange={handleSshConfigChange} />
-              </label>
-          </div>
-          <div className='row'>
-              <label>
-                  WebSocket Server Address:
-                  <input type="text" value={wsServerAddress} onChange={handleWsServerAddressChange} />
-              </label>
-          </div>
-      </div>
-      <div className='buttons'>
-          <button onClick={handleSubmit}>확인</button>
-          <button onClick={onClose}>취소</button>
-      </div>
-  </div>
+    <>
+      <div className="backdrop" onClick={onClose}></div>
+      <div className='modal'>
+        <h1>SSH Bridge</h1>
+        <div className='container'>
+            <div className='row'>
+                <label>
+                    SSH Server Host:
+                    <input id="ssh-host" type="text" value={SshServerConfig.host || ""} onChange={handleSshConfigChange} />
+                </label>
+            </div>
+            <div className='row'>
+                <label>
+                    SSH Server Port:
+                    <input id="ssh-port" type="text" value={SshServerConfig.port || ""} onChange={handleSshConfigChange} />
+                </label>
+            </div>
+            <div className='row'>
+                <label>
+                    SSH Server Username:
+                    <input id="ssh-user" type="text" value={SshServerConfig.username || ""} onChange={handleSshConfigChange} />
+                </label>
+            </div>
+            <div className='row'>
+                <label>
+                    SSH Server Password:
+                    <input id="ssh-pass" type="password" value={SshServerConfig.password || ""} onChange={handleSshConfigChange} />
+                </label>
+            </div>
+            <div className='row'>
+                <label>
+                    WebSocket Server Address:
+                    <input type="text" value={wsServerAddress} onChange={handleWsServerAddressChange} />
+                </label>
+            </div>
+        </div>
+        <div className='buttons'>
+            <button onClick={handleSubmit}>확인</button>
+            <button onClick={onClose}>취소</button>
+        </div>
+    </div>
+  </>
   );
 }
 

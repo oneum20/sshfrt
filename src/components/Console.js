@@ -1,15 +1,18 @@
-import React, {useEffect, useRef } from 'react';
-import { Terminal } from "xterm"
-import { FitAddon } from "xterm-addon-fit"
-import { AttachAddon } from "xterm-addon-attach"
-import "./Console.css"
-import "xterm/css/xterm.css"
+import React, {useEffect, useRef, useState } from 'react';
+import { Terminal } from "xterm";
+import { FitAddon } from "xterm-addon-fit";
+import { AttachAddon } from "xterm-addon-attach";
+import "./Console.css";
+import "xterm/css/xterm.css";
+import { useTerminal } from '../hooks/userTerminal';
 
-function Console(props) {
+function Console({uid, wsServerAddress, sshServerConfig, terminalsRef, id}) {
   const terminalRef = useRef(null);
   const containerRef = useRef(null);
   const websocketRef = useRef(null);
   const fitAddon = new FitAddon();
+  const { handleItemStateChange } = useTerminal();
+  const [isMounted, setIsMounted] = useState(false);
   
 
   useEffect(() => {
@@ -17,41 +20,41 @@ function Console(props) {
       const terminal = new Terminal();
       terminal.loadAddon(fitAddon);
 
-      // 로그 레벨 설정
+      // xtermjs 로그 레벨 설정
       // terminal.options.logLevel = "trace";
       
-      terminal.open(containerRef.current)
+      terminal.open(containerRef.current);
       terminal.writeln("Hello web terminal");
 
       fitAddon.fit();
-      props.terminalsRef.current[props.uid] = terminal;
+      terminalsRef.current[uid] = terminal;
       terminalRef.current = terminal;
 
 
 
       // Websocket 연결 처리
-      const ws = new WebSocket(props.wsServerAddress);
+      const ws = new WebSocket(wsServerAddress);
       const attachAddon = new AttachAddon(ws);
       terminal.loadAddon(attachAddon);
 
 
 
-      ws.onopen = () => {
-        let curState = props.uid + "-new";
-        terminal.writeln("Connecting to " + props.wsServerAddress);
+      ws.onopen = () => {        
+        let curState = `${uid}-new`;
+        terminal.writeln("Connecting to " + wsServerAddress);
         // TODO:  cols, rows 전달이 안될 때가 있음. 확인 필요
-        let data = Object.assign({}, props.sshServerConfig, {cols: terminal.cols, rows: terminal.rows});
+        let data = Object.assign({}, sshServerConfig, {cols: terminal.cols, rows: terminal.rows});
         ws.send(JSON.stringify(data));
 
         
-        props.onStateChange(curState);
+        handleItemStateChange(curState);
         
       };
 
-      ws.onclose = () => {
-        let curState = props.uid + "-close";
+      ws.onclose = () => {        
+        let curState = `${uid}-close`;
 
-        props.onStateChange(curState);
+        handleItemStateChange(curState);
       };
 
       ws.onerror = (event) => {
@@ -60,37 +63,27 @@ function Console(props) {
 
       websocketRef.current = ws;
 
+
+      setIsMounted(true);
     }    
 
     // Cleanup function
     return () => {
-      if (terminalRef.current) {
-        terminalRef.current.dispose();
-      }
-      if (websocketRef.current) {
-        websocketRef.current.close();
-      }
+      if (isMounted){
+        if (terminalRef.current) {
+          terminalRef.current.dispose();
+        }
+        if (websocketRef.current) {
+          websocketRef.current.close();
+        }
+      }      
     };
 
-  }, [props.id, props.wsServerAddress, props.uid, props.sshServerConfig, props.onStateChange, props.terminalsRef]);
-
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (websocketRef.current) {
-        websocketRef.current.close();
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, []);
+  }, [id, wsServerAddress, uid, sshServerConfig]);
 
   return (
     <div>
-      <div id={props.id} ref={containerRef}></div>
+      <div id={id} ref={containerRef}></div>
     </div>
     
   );

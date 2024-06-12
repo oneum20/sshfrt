@@ -13,16 +13,18 @@
   display: flex;
   align-items: center;
   position: relative;
+
+  
 }
 
 .tab-button {
   padding: 10px 20px;
   padding-right: 40px;
-  margin-right: 5px;
+  margin-right: 0px;
   margin-bottom: 1px;
   background-color: #555353;
   color: rgb(187, 184, 184);
-  border: none;
+  border: 1px solid rgba(23, 24, 23, 0.952);
   border-radius: 5px 5px 0 0;
   cursor: pointer;
   transition: background-color 0.3s ease;
@@ -30,7 +32,7 @@
   display: flex;
   align-items: center;
 
-  max-width: 200px; /* 최대 너비 설정 */
+  max-width: 250px; /* 최대 너비 설정 */
 }
 
 .tab-button.active {
@@ -57,7 +59,7 @@
   padding: 0 5px;
   font-size: 14px;
   position: absolute;
-  right: 10%;
+  right: 5%;
   top: 25%;
 }
 
