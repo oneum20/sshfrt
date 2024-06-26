@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Modal from './Modal';
 import Tab from "./Tabs";
 import Split from 'react-split';
@@ -6,7 +6,17 @@ import { useTerminal } from '../hooks/userTerminal';
 import "./App.css";
  
 function App() {
-    const { isModalOpen, handleOpenModal, handleCloseModal, handleSaveItem, items, handleCloseTab, tabFocus} = useTerminal();
+    const { isModalOpen, handleOpenModal, handleCloseModal, handleSaveItem, items, tabFocus, handleItemResize, handleCloseTab} = useTerminal();
+    const tabFocusRef = useRef(tabFocus);
+
+
+    useEffect(() => {
+        tabFocusRef.current = tabFocus;
+    }, [tabFocus]);
+
+    const handleSplitDragEnd = () => {
+        handleItemResize(tabFocusRef.current);
+    };
 
     return (
         
@@ -25,7 +35,9 @@ function App() {
                     const gutterElement = document.createElement('div');
                     gutterElement.className = `gutter gutter-horizontal`;
                     return gutterElement;
-                }}       
+                }}      
+                
+                onDragEnd={handleSplitDragEnd}
             >
                 <div className="editor">
                 </div>

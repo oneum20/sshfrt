@@ -22,7 +22,7 @@ const TerminalProvider = ({children}) => {
             setItems(restoredItems);
             setIdCounter(Math.max(...savedItems.map(item => item.key)));
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line 
     }, []);
 
     useEffect(() => {
@@ -62,7 +62,6 @@ const TerminalProvider = ({children}) => {
     );
 
     const handleSaveItem = (item) => {
-        
         const gendKey = generateId();
         const terminal = {
             key: gendKey,
@@ -77,6 +76,12 @@ const TerminalProvider = ({children}) => {
         setTabFocus(gendKey);
     };
 
+    const handleItemResize = (focus)  => {
+        const terminal = terminalsRef.current[focus];
+        
+        if (focus !== null) terminal[1].fit();
+    };
+
     const handleItemStateChange = (state) => {
         const arr = state.split('-');
         const key = parseInt(arr[0]);
@@ -85,24 +90,21 @@ const TerminalProvider = ({children}) => {
 
         if (value === "close") {
             if (terminalsRef.current[key]) {
-                terminalsRef.current[key].dispose();
+                terminalsRef.current[key][0].dispose();
                 delete terminalsRef.current[key];
             }
 
 
-            console.log("preItems >> ", items.length)
+            console.log("preItems >> ", items.length);
             setItems(prevItems => {
                 const newItems = prevItems.filter(item => item.key !== key);
 
-                console.log("postItems >> ", newItems.length)
-                console.log("idx : ", idx);
-
                 if (newItems.length <= 0){
-                    setTabFocus(null)
+                    setTabFocus(null);
                 } else if (idx >= newItems.length){
-                    setTabFocus(newItems[idx - 1].key)
+                    setTabFocus(newItems[idx - 1].key);
                 } else {
-                    setTabFocus(newItems[idx].key)
+                    setTabFocus(newItems[idx].key);
                 }
                 return newItems;
             });
@@ -114,7 +116,7 @@ const TerminalProvider = ({children}) => {
 
     const handleCloseTab = (key) => {
         handleItemStateChange(`${key}-close`);
-    }
+    };
 
     return (
         <TerminalContext.Provider
@@ -124,14 +126,16 @@ const TerminalProvider = ({children}) => {
                 handleCloseModal,
                 items,
                 handleSaveItem,
+                handleItemResize,
                 handleItemStateChange,
                 handleCloseTab,
-                tabFocus
+                tabFocus,
+                setTabFocus
             }}
         >
             {children}
         </TerminalContext.Provider>
-    )
+    );
 };
 
 export { TerminalContext, TerminalProvider };

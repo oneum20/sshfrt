@@ -2,8 +2,8 @@ import React, {useEffect, useRef, useState } from 'react';
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import { AttachAddon } from "xterm-addon-attach";
-import "./Console.css";
 import "xterm/css/xterm.css";
+import "./Console.css";
 import { useTerminal } from '../hooks/userTerminal';
 
 function Console({uid, wsServerAddress, sshServerConfig, terminalsRef, id}) {
@@ -27,7 +27,7 @@ function Console({uid, wsServerAddress, sshServerConfig, terminalsRef, id}) {
       terminal.writeln("Hello web terminal");
 
       fitAddon.fit();
-      terminalsRef.current[uid] = terminal;
+      terminalsRef.current[uid] = [terminal, fitAddon];
       terminalRef.current = terminal;
 
 
@@ -50,6 +50,12 @@ function Console({uid, wsServerAddress, sshServerConfig, terminalsRef, id}) {
         handleItemStateChange(curState);
         
       };
+
+      terminal.onResize(({cols, rows}) => {
+        let data = {action: "resize",cols: cols, rows: rows};
+
+        ws.send(JSON.stringify(data));
+      });
 
       ws.onclose = () => {        
         let curState = `${uid}-close`;
@@ -79,11 +85,11 @@ function Console({uid, wsServerAddress, sshServerConfig, terminalsRef, id}) {
       }      
     };
 
-  }, [id, wsServerAddress, uid, sshServerConfig]);
+  }, [id, wsServerAddress, uid, sshServerConfig, isMounted]);
 
   return (
-    <div>
-      <div id={id} ref={containerRef}></div>
+    <div style={{height: '100%', overflow: "hidden"}}>
+      <div  id={id} ref={containerRef}  style={{ width: '100%', height: '100%', overflow: "hidden"}}></div>
     </div>
     
   );

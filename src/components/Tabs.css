@@ -1,6 +1,7 @@
 .tabs-container {
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 
 .tab-buttons {
@@ -68,10 +69,12 @@
 }
 
 .tab-content {
+  height: 90%;
   padding: 7px;
   border-radius: 0 5px 5px 5px;
   background-color: rgba(23, 24, 23, 0.952);
   margin-top: -1px;
+  overflow: hidden;
 }
 
 .tab-pane {
@@ -79,5 +82,8 @@
 }
 
 .tab-pane.active {
+  height: 100%;
+  background-color: rgba(23, 24, 23, 0.952);
   display: block;
+  overflow: hidden;
 }

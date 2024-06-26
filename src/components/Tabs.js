@@ -1,16 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { useTerminal } from '../hooks/userTerminal';
 import './Tabs.css';
 
 function Tabs({contents, onCloseTab, focus}){
-  const [activeTab, setActiveTab] = useState(null);
+  const {tabFocus, setTabFocus} = useTerminal();
 
 
   useEffect(() => {
-    setActiveTab(focus !== null ? focus : contents.length > 0 ? contents[contents.length - 1].key : null);
-  }, [contents.length, focus]);
+    setTabFocus(tabFocus !== null ? tabFocus : contents.length > 0 ? contents[contents.length - 1].key : null);
+  }, [contents.length, focus, setTabFocus]);
 
   const handleTabClick = (tab) => {
-    setActiveTab(tab);
+    setTabFocus(tab);
   };
 
   const handleTabClose = (key, event) => {
@@ -25,7 +26,7 @@ function Tabs({contents, onCloseTab, focus}){
         {contents.map((item) => (
           <div key={`btn-${item.key}`} className="tab-button-container">
             <button 
-              className={`tab-button ${item.key === activeTab ? 'active' : ''}`}
+              className={`tab-button ${item.key === tabFocus ? 'active' : ''}`}
               onClick={() => handleTabClick(item.key)}
             >
               <span className="tab-button-text">{item.name}</span>
@@ -39,13 +40,13 @@ function Tabs({contents, onCloseTab, focus}){
           </div>
         ))}
       </div>
-      
+
       {/* 탭 내용 */}
       <div className="tab-content">
         {contents.map((item) => (
           <div 
             key={`console-${item.key}`} 
-            className={`tab-pane ${item.key === Number(activeTab) ? 'active' : ''}`}
+            className={`tab-pane ${item.key === Number(tabFocus) ? 'active' : ''}`}
           >
             {item.content}
           </div>
@@ -54,6 +55,6 @@ function Tabs({contents, onCloseTab, focus}){
       </div>
     </div>
   );
-};
+}
 
 export default Tabs;
