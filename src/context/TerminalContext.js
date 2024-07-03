@@ -79,7 +79,7 @@ const TerminalProvider = ({children}) => {
     const handleItemResize = (focus)  => {
         const terminal = terminalsRef.current[focus];
         
-        if (focus !== null) terminal[1].fit();
+        if (focus !== null && terminal[0].state === `${focus}-ready`) terminal[1].fit();
     };
 
     const handleItemStateChange = (state) => {
@@ -94,8 +94,6 @@ const TerminalProvider = ({children}) => {
                 delete terminalsRef.current[key];
             }
 
-
-            console.log("preItems >> ", items.length);
             setItems(prevItems => {
                 const newItems = prevItems.filter(item => item.key !== key);
 

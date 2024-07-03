@@ -1,7 +1,6 @@
 import React, {useEffect, useRef, useState } from 'react';
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
-import { AttachAddon } from "xterm-addon-attach";
 import "xterm/css/xterm.css";
 import "./Console.css";
 import { useTerminal } from '../hooks/userTerminal';
@@ -24,42 +23,55 @@ function Console({uid, wsServerAddress, sshServerConfig, terminalsRef, id}) {
       // terminal.options.logLevel = "trace";
       
       terminal.open(containerRef.current);
-      terminal.writeln("Hello web terminal");
 
-      fitAddon.fit();
-      terminalsRef.current[uid] = [terminal, fitAddon];
+      fitAddon.fit();      
       terminalRef.current = terminal;
 
-
+      
 
       // Websocket 연결 처리
       const ws = new WebSocket(wsServerAddress);
-      const attachAddon = new AttachAddon(ws);
-      terminal.loadAddon(attachAddon);
-
-
 
       ws.onopen = () => {        
         let curState = `${uid}-new`;
-        terminal.writeln("Connecting to " + wsServerAddress);
+        let terminalMessage = {
+          action: "terminal",
+          data: `Connecting to ${wsServerAddress}`
+        };
+
+        terminal.writeln(terminalMessage);
+
         // TODO:  cols, rows 전달이 안될 때가 있음. 확인 필요
         let data = Object.assign({}, sshServerConfig, {cols: terminal.cols, rows: terminal.rows});
         ws.send(JSON.stringify(data));
 
-        
-        handleItemStateChange(curState);
-        
+        terminalRef.current.state = curState;
+        handleItemStateChange(curState);        
       };
 
-      terminal.onResize(({cols, rows}) => {
-        let data = {action: "resize",cols: cols, rows: rows};
+      ws.onmessage = (event) => {
+        const rcvMsg = JSON.parse(event.data);
+        const decodedData = atob(rcvMsg.data);
+        
 
-        ws.send(JSON.stringify(data));
-      });
+        if (terminalRef.current.state === `${uid}-new`) {
+          let curState = `${uid}-ready`;
+          terminalRef.current.state = curState;
+        }
+        
+        switch (rcvMsg.action) {
+          case 'terminal':
+            terminal.write(decodedData);
+            break;
+          default:
+            console.warn('Unknown action :', rcvMsg.action);
+        }
+      };
 
       ws.onclose = () => {        
         let curState = `${uid}-close`;
 
+        terminalRef.current.state = curState;
         handleItemStateChange(curState);
       };
 
@@ -67,7 +79,20 @@ function Console({uid, wsServerAddress, sshServerConfig, terminalsRef, id}) {
         terminal.writeln(event);
       };
 
-      websocketRef.current = ws;
+      terminal.onResize(({cols, rows}) => {
+        let data = {action: "resize", cols: cols, rows: rows};
+
+        ws.send(JSON.stringify(data));
+      });
+
+      terminal.onData(data => {
+        ws.send(JSON.stringify({action: 'terminal', data: data}));
+      });
+
+      websocketRef.current = ws;      
+
+
+      terminalsRef.current[uid] = [terminal, fitAddon, ws];
 
 
       setIsMounted(true);

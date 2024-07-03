@@ -17,7 +17,6 @@
 .xterm-viewport::-webkit-scrollbar {
     width: 1px;              /* 스크롤바 너비 */
     background-color: #222;  /* 트랙 배경 색상 */
-    
 }
 
 .xterm-viewport::-webkit-scrollbar-thumb {

@@ -3,12 +3,15 @@ import { useTerminal } from '../hooks/userTerminal';
 import './Tabs.css';
 
 function Tabs({contents, onCloseTab, focus}){
-  const {tabFocus, setTabFocus} = useTerminal();
-
+  const {tabFocus, setTabFocus, handleItemResize} = useTerminal();
 
   useEffect(() => {
     setTabFocus(tabFocus !== null ? tabFocus : contents.length > 0 ? contents[contents.length - 1].key : null);
   }, [contents.length, focus, setTabFocus]);
+
+  useEffect(() => {
+    handleItemResize(tabFocus);
+  }, [tabFocus]);
 
   const handleTabClick = (tab) => {
     setTabFocus(tab);
