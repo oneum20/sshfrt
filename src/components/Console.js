@@ -3,15 +3,23 @@ import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import "xterm/css/xterm.css";
 import "./Console.css";
-import { useTerminal } from '../hooks/userTerminal';
+import { useTerminal } from '../hooks/useTerminal';
+import { eventManager } from '../utils/EventManager';
 
 function Console({uid, wsServerAddress, sshServerConfig, terminalsRef, id}) {
   const terminalRef = useRef(null);
   const containerRef = useRef(null);
   const websocketRef = useRef(null);
   const fitAddon = new FitAddon();
-  const { handleItemStateChange } = useTerminal();
+  const { handleItemStateChange, handleFileTree } = useTerminal();
   const [isMounted, setIsMounted] = useState(false);
+  const [terminalState, setTerminalState] = useState(null);
+
+  useEffect(()=>{
+    if(terminalState && terminalState === `${uid}-ready`){
+      handleFileTree(uid, null);
+    }
+  }, [terminalState]);
   
 
   useEffect(() => {
@@ -46,7 +54,8 @@ function Console({uid, wsServerAddress, sshServerConfig, terminalsRef, id}) {
         ws.send(JSON.stringify(data));
 
         terminalRef.current.state = curState;
-        handleItemStateChange(curState);        
+        setTerminalState(curState);
+        handleItemStateChange(curState);             
       };
 
       ws.onmessage = (event) => {
@@ -57,12 +66,32 @@ function Console({uid, wsServerAddress, sshServerConfig, terminalsRef, id}) {
         if (terminalRef.current.state === `${uid}-new`) {
           let curState = `${uid}-ready`;
           terminalRef.current.state = curState;
+          setTerminalState(curState);
         }
         
         switch (rcvMsg.action) {
           case 'terminal':
             terminal.write(decodedData);
             break;
+          case 'getfiles': {
+            let data = JSON.parse(decodedData);
+            if(terminalsRef.current[uid][3] == undefined){
+              terminalsRef.current[uid][3] = [{
+                name: data.parent,
+                isDir: true,
+                files: []
+              }];
+            }
+
+            if(!data.fileTree){
+              data.fileTree = [];
+            }
+
+            addItemsToDirectory(terminalsRef.current[uid][3], data, terminalsRef.current[uid][3][0].name);
+            
+            eventManager.emit('fileTreeUpdate', { uid, terminalsRef });
+            break;
+          }
           default:
             console.warn('Unknown action :', rcvMsg.action);
         }
@@ -72,6 +101,7 @@ function Console({uid, wsServerAddress, sshServerConfig, terminalsRef, id}) {
         let curState = `${uid}-close`;
 
         terminalRef.current.state = curState;
+        setTerminalState(curState);
         handleItemStateChange(curState);
       };
 
@@ -97,6 +127,25 @@ function Console({uid, wsServerAddress, sshServerConfig, terminalsRef, id}) {
 
       setIsMounted(true);
     }    
+
+    const addItemsToDirectory = (targetFileTree, inputFileTree, root) => {
+      const findAndAdd = (currentItems, pathParts) => {
+        for (let item of currentItems) {
+          if (item.isDir && item.name === pathParts[0]) {
+            if (pathParts.length === 1) {
+              item.files = [];
+              item.files = [...item.files, ...inputFileTree.fileTree];
+              return true;
+            }
+            return findAndAdd(item.files, pathParts.slice(1));
+          }
+        }
+        return false;
+      };
+    
+      const pathParts = [root, ...inputFileTree.parent.replace(root,"").split('/').filter(part => part)];
+      findAndAdd(targetFileTree, pathParts);
+    };
 
     // Cleanup function
     return () => {

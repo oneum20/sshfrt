@@ -1,16 +1,20 @@
 import React, { useEffect } from 'react';
-import { useTerminal } from '../hooks/userTerminal';
+import { useTerminal } from '../hooks/useTerminal';
+import { eventManager } from '../utils/EventManager';
 import './Tabs.css';
 
 function Tabs({contents, onCloseTab, focus}){
-  const {tabFocus, setTabFocus, handleItemResize} = useTerminal();
+  const {tabFocus, setTabFocus, handleItemResize, terminalsRef} = useTerminal();
 
   useEffect(() => {
     setTabFocus(tabFocus !== null ? tabFocus : contents.length > 0 ? contents[contents.length - 1].key : null);
   }, [contents.length, focus, setTabFocus]);
 
   useEffect(() => {
-    handleItemResize(tabFocus);
+    let uid = tabFocus;
+    
+    handleItemResize(uid);
+    eventManager.emit('fileTreeUpdate', { uid, terminalsRef });
   }, [tabFocus]);
 
   const handleTabClick = (tab) => {

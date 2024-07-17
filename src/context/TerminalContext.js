@@ -1,5 +1,6 @@
 import React, {createContext, useState, useRef, useEffect} from 'react';
 import Console from '../components/Console';
+import { eventManager } from '../utils/EventManager';
 
 const TerminalContext = createContext();
 
@@ -76,10 +77,20 @@ const TerminalProvider = ({children}) => {
         setTabFocus(gendKey);
     };
 
+    const handleFileTree = (focus, root) => {
+        const terminal = terminalsRef.current[focus];
+        let data = JSON.stringify({
+            action: "getfiles", 
+            root: root === null ? "HOME_DIR" : root
+        });
+
+        if (focus !== null && terminal[0].state === `${focus}-ready`) terminal[2].send(data);
+    };
+
     const handleItemResize = (focus)  => {
         const terminal = terminalsRef.current[focus];
         
-        if (focus !== null && terminal[0].state === `${focus}-ready`) terminal[1].fit();
+        if (focus !== null && terminal && terminal[0].state === `${focus}-ready`) terminal[1].fit();
     };
 
     const handleItemStateChange = (state) => {
@@ -96,14 +107,16 @@ const TerminalProvider = ({children}) => {
 
             setItems(prevItems => {
                 const newItems = prevItems.filter(item => item.key !== key);
-
+                let nextTabFocus = null;
                 if (newItems.length <= 0){
-                    setTabFocus(null);
+                    nextTabFocus = null;
                 } else if (idx >= newItems.length){
-                    setTabFocus(newItems[idx - 1].key);
+                    nextTabFocus = newItems[idx - 1].key;
                 } else {
-                    setTabFocus(newItems[idx].key);
+                    nextTabFocus = newItems[idx].key;
                 }
+
+                eventManager.emit('fileTreeUpdate', { nextTabFocus });
                 return newItems;
             });
 
@@ -128,7 +141,9 @@ const TerminalProvider = ({children}) => {
                 handleItemStateChange,
                 handleCloseTab,
                 tabFocus,
-                setTabFocus
+                setTabFocus,
+                handleFileTree,
+                terminalsRef
             }}
         >
             {children}
